@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.12.0/.schema/devbox.schema.json",
+  "packages": [
+    "kind@latest",
+    "fluxcd@latest",
+    "docker@latest",
+    "jq@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "./init.sh"
+    ],
+    "scripts": {
+      "test": [
+        "echo \"Error: no test specified\" && exit 1"
+      ]
+    }
+  }
+}

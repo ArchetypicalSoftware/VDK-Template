@@ -1,0 +1,11 @@
+# Ignore the .bin directory and all contents
+.bin/
+
+# Ignore the ConfigMounts directory and all contents
+ConfigMounts/
+
+# Ignore the Certs directory and all contents
+Certs/
+
+# Ignore the devbox.lock file
+devbox.lock
