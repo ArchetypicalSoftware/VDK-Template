@@ -1,35 +1,88 @@
 # /bin/bash
-if groups $USER | grep -q "\bdocker\b"; then
-    echo "Welcome to Vega VDK"
-    # Variables
-    REPO="ArchetypicalSoftware/VDK" # Replace with your GitHub repository (e.g., username/repo)
-    TOKEN=$GITHUB_VDK_TOKEN # Replace with your GitHub Personal Access Token
-    ASSET_NAME="vega-linux-x64.tar.gz" # Replace with the asset name you're looking for
-    DOWNLOAD_DIR="./.bin" # Specify the download directory
+# Docker permissions hardening for Linux and macOS
+OS_TYPE=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+if [ "$OS_TYPE" = "linux" ]; then
+    if ! getent group docker > /dev/null 2>&1; then
+        echo "[INFO] Creating 'docker' group (requires sudo)"
+        sudo groupadd docker
+    fi
+    if ! groups $USER | grep -q '\bdocker\b'; then
+        echo "[INFO] Adding user $USER to 'docker' group (requires sudo)"
+        sudo usermod -aG docker "$USER"
+        echo "[INFO] Please exit and restart your shell to pick up group membership changes."
+        exit 0
+    fi
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "[ERROR] Docker CLI is not installed. Please install Docker before proceeding."
+        exit 1
+    fi
+    echo "[SUCCESS] Docker permissions are set up for $USER."
+elif [ "$OS_TYPE" = "darwin" ]; then
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "[ERROR] Docker CLI is not installed. Please install Docker Desktop for Mac."
+        exit 1
+    fi
+    # Check if Docker Desktop is running
+    if ! docker info >/dev/null 2>&1; then
+        echo "[ERROR] Docker Desktop does not appear to be running. Please start Docker Desktop."
+        exit 1
+    fi
+    echo "[SUCCESS] Docker is available on macOS."
+else
+    echo "[ERROR] Unsupported OS: $OS_TYPE. This script supports only Linux and macOS."
+    exit 1
+fi
+
+echo "Welcome to Vega VDK"
+# Variables
+REPO="ArchetypicalSoftware/VDK" # Replace with your GitHub repository (e.g., username/repo)
+DOWNLOAD_DIR="./.bin" # Specify the download directory
+
+    # Detect OS and architecture
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH="x64" ;;
+        arm64|aarch64)
+            ARCH="arm64" ;;
+        *)
+            echo "Unsupported architecture: $ARCH"
+            exit 1 ;;
+    esac
+
+    # Map OS name if necessary
+    case "$OS" in
+        linux|darwin)
+            ;;
+        *)
+            echo "Unsupported OS: $OS"
+            exit 1 ;;
+    esac
+
+    ASSET_NAME="vega-$OS-$ARCH.tar.gz"
 
     # Get the latest release information
     echo "Fetching the latest release information..."
-    LATEST_RELEASE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$REPO/releases/latest")
+    LATEST_RELEASE=$(curl -s "https://api.github.com/repos/$REPO/releases/latest")
     VERSION=$(echo "$LATEST_RELEASE" | jq -r ".tag_name")
     CURRENT=$(cat ./.bin/vdk.version)
     if [ "$VERSION" != "$CURRENT" ]; then
-        # Extract the asset ID for the desired asset
-        ASSET_ID=$(echo "$LATEST_RELEASE" | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .id")
+        # Extract the browser_download_url for the detected asset
+        ASSET_URL=$(echo "$LATEST_RELEASE" | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .browser_download_url")
 
-        if [ -z "$ASSET_ID" ]; then
-            echo "Error: Asset \"$ASSET_NAME\" not found in the latest release."
+        if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" == "null" ]; then
+            echo "Error: Asset for OS '$OS' and arch '$ARCH' (expected name: $ASSET_NAME) not found in the latest release."
             exit 1
         fi
 
         # Create the download directory if it doesn't exist
         mkdir -p "$DOWNLOAD_DIR"
 
-        # Download the asset
+        # Download the asset directly (no token needed)
         echo "Downloading asset \"$ASSET_NAME\"..."
-        curl -L -H "Authorization: token $TOKEN" \
-        -H "Accept: application/octet-stream" \
-        "https://api.github.com/repos/$REPO/releases/assets/$ASSET_ID" \
-        -o "$DOWNLOAD_DIR/$ASSET_NAME"
+        curl -L "$ASSET_URL" -o "$DOWNLOAD_DIR/$ASSET_NAME"
 
         echo "Download complete! File saved to \"$DOWNLOAD_DIR/$ASSET_NAME\""  
         echo "Extracting Vega CLI..."
@@ -45,17 +98,8 @@ if groups $USER | grep -q "\bdocker\b"; then
     cd ./.bin
     BIN_PATH=$(pwd)
     cd ..
-    # echo "$PATH" | grep -q $BIN_PATH
-    # if [ $? -ne 0 ]; then
-    #     echo "Updating Path"
-    #     echo >> ~/.bashrc && echo "export PATH='$PATH:$BIN_PATH'" >> ~/.bashrc && source ~/.bashrc
-    # fi
-else
-    echo "Adding user $USER to docker group"
-    echo " (This will require sudo access)"
-    sudo usermod -aG docker "$USER"
-    echo "Please exit and restart your shell to pick up group membership changes."
-fi
-
-# sudo gpasswd -d username groupname
-# sudo gpasswd -d $USER docker
+    echo "$PATH" | grep -q $BIN_PATH
+    if [ $? -ne 0 ]; then
+        echo "Updating Path"
+        echo >> ~/.bashrc && echo "export PATH='$PATH:$BIN_PATH'" >> ~/.bashrc && source ~/.bashrc
+    fi
