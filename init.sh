@@ -39,29 +39,31 @@ echo "Welcome to Vega VDK"
 REPO="ArchetypicalSoftware/VDK" # Replace with your GitHub repository (e.g., username/repo)
 DOWNLOAD_DIR="./.bin" # Specify the download directory
 
-    # Detect OS and architecture
-    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-    ARCH=$(uname -m)
-    case "$ARCH" in
+    # Detect OS and architecture and map to .NET Runtime Identifiers (RIDs)
+    UNAME_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    UNAME_ARCH=$(uname -m)
+    case "$UNAME_OS" in
+        linux)
+            RID_OS="linux" ;;
+        darwin)
+            RID_OS="osx" ;;
+        *)
+            echo "Unsupported OS: $UNAME_OS"
+            exit 1 ;;
+    esac
+
+    case "$UNAME_ARCH" in
         x86_64|amd64)
-            ARCH="x64" ;;
+            RID_ARCH="x64" ;;
         arm64|aarch64)
-            ARCH="arm64" ;;
+            RID_ARCH="arm64" ;;
         *)
-            echo "Unsupported architecture: $ARCH"
+            echo "Unsupported architecture: $UNAME_ARCH"
             exit 1 ;;
     esac
 
-    # Map OS name if necessary
-    case "$OS" in
-        linux|darwin)
-            ;;
-        *)
-            echo "Unsupported OS: $OS"
-            exit 1 ;;
-    esac
-
-    ASSET_NAME="vega-$OS-$ARCH.tar.gz"
+    RID="$RID_OS-$RID_ARCH"
+    ASSET_NAME="vega-$RID.tar.gz"
 
     # Get the latest release information
     echo "Fetching the latest release information..."
