@@ -87,8 +87,19 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         echo "Download complete! File saved to \"$DOWNLOAD_DIR/$ASSET_NAME\""  
         echo "Extracting Vega CLI..."
         tar --overwrite -xvf "$DOWNLOAD_DIR/$ASSET_NAME" -C "$DOWNLOAD_DIR"
-        mv -f "$DOWNLOAD_DIR/packages/build/linux-x64/vega" ./.bin/vega
-        rm -rf "$DOWNLOAD_DIR/packages"
+        # Find the vega binary in the extracted files and move it to ./.bin/vega
+        FOUND_VEGA=$(find "$DOWNLOAD_DIR" -type f -name vega | head -n 1)
+        if [ -n "$FOUND_VEGA" ]; then
+            if [ "$FOUND_VEGA" != "./.bin/vega" ]; then
+                mv -f "$FOUND_VEGA" ./.bin/vega
+                echo "[INFO] Vega binary moved to ./.bin/vega"
+            else
+                echo "[INFO] Vega binary already in ./.bin/vega"
+            fi
+        else
+            echo "[WARNING] Vega binary not found after extraction."
+        fi
+        rm -rf "$DOWNLOAD_DIR/packages" "$DOWNLOAD_DIR/Certs" "$DOWNLOAD_DIR/ConfigMounts"
         rm "$DOWNLOAD_DIR/$ASSET_NAME"
         echo "$VERSION" > "$DOWNLOAD_DIR/vdk.version"
         echo "Version: $VERSION" 
@@ -100,6 +111,16 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     cd ..
     echo "$PATH" | grep -q $BIN_PATH
     if [ $? -ne 0 ]; then
-        echo "Updating Path"
-        echo >> ~/.bashrc && echo "export PATH='$PATH:$BIN_PATH'" >> ~/.bashrc && source ~/.bashrc
+        echo "[INFO] Adding $BIN_PATH to PATH for this session and future shells."
+        export PATH="$PATH:$BIN_PATH"
+        echo "export PATH=\"\$PATH:$BIN_PATH\"" >> ~/.bashrc
+        echo "[INFO] Please restart your shell or run: export PATH=\"\$PATH:$BIN_PATH\""
+    fi
+
+    # Check Vega CLI version
+    if command -v vega >/dev/null 2>&1; then
+        echo "[INFO] Vega CLI version output:"
+        vega --version || echo "[WARNING] Failed to run Vega CLI."
+    else
+        echo "[WARNING] Vega CLI not found in PATH or not executable."
     fi
