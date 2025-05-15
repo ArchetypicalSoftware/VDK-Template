@@ -101,7 +101,6 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         else
             echo "[WARNING] Vega binary not found after extraction."
         fi
-        rm -rf "$DOWNLOAD_DIR/packages" "$DOWNLOAD_DIR/Certs" "$DOWNLOAD_DIR/ConfigMounts"
         rm "$DOWNLOAD_DIR/$ASSET_NAME"
         echo "$VERSION" > "$DOWNLOAD_DIR/vdk.version"
         echo "Version: $VERSION" 
