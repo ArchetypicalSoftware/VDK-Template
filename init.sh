@@ -122,7 +122,40 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     # Check Vega CLI version
     if command -v vega >/dev/null 2>&1; then
         echo "[INFO] Vega CLI version output:"
-        vega --version || echo "[WARNING] Failed to run Vega CLI."
+        VEGA_OUT="$(vega --version 2>&1)"
+        VEGA_EXIT=$?
+        echo "$VEGA_OUT"
+        if [ "$OS_TYPE" = "darwin" ]; then
+            # 1. Check for architecture mismatch
+            MAC_ARCH=$(uname -m)
+            BIN_ARCH=$(file .bin/vega | grep -oE 'arm64|x86_64')
+            if [ "$MAC_ARCH" = "arm64" ] && [ "$BIN_ARCH" = "x86_64" ]; then
+                echo "[WARNING] You are running an x64 binary on Apple Silicon. Try installing Rosetta: sudo softwareupdate --install-rosetta, or use the osx-arm64 build."
+            elif [ "$MAC_ARCH" = "x86_64" ] && [ "$BIN_ARCH" = "arm64" ]; then
+                echo "[ERROR] You are running an ARM64 binary on an Intel Mac. Use the osx-x64 build."
+            fi
+
+            # 2. Check for missing Swift runtime libraries
+            MISSING_SWIFT=0
+            for LIB in libswiftCore.dylib libswiftFoundation.dylib; do
+                if ! otool -L .bin/vega | grep -q "$LIB"; then
+                    MISSING_SWIFT=1
+                fi
+            done
+            if [ $MISSING_SWIFT -eq 1 ]; then
+                echo "[WARNING] Vega CLI may require the Swift runtime. Install Xcode or Xcode Command Line Tools: xcode-select --install"
+            fi
+
+            # 3. If killed or nonzero exit, print suggestions
+            if echo "$VEGA_OUT" | grep -qi 'killed' || [ $VEGA_EXIT -ne 0 ]; then
+                echo "[ERROR] Vega CLI failed to run. Suggestions:"
+                echo "- Ensure you are using the correct binary for your architecture."
+                echo "- Try installing Rosetta (for x64 on Apple Silicon): sudo softwareupdate --install-rosetta"
+                echo "- Install Xcode or Xcode Command Line Tools for Swift runtime."
+                echo "- Check for missing libraries: otool -L .bin/vega"
+                echo "- For more details, check system logs: log show --predicate 'process == \"vega\"' --info --last 1h"
+            fi
+        fi
     else
         echo "[WARNING] Vega CLI not found in PATH or not executable."
     fi
