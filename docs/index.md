@@ -10,9 +10,11 @@ Copy and paste this command into your terminal, or click the button to copy:
 
 <div style="position: relative; margin-bottom: 1em;">
   <pre style="background: #222; color: #fff; padding: 1em; border-radius: 6px; overflow-x: auto;">
-    <code id="install-cmd">bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArchetypicalSoftware/VDK-Template/main/install.sh)"</code>
+    <code id="install-cmd">bash -c "$(curl -fsSL https://vdk.sh/install.sh)"</code>
   </pre>
-  <button onclick="copyInstallCmd()" id="copy-btn" style="position: absolute; top: 10px; right: 10px; background: #00b894; color: white; border: none; border-radius: 4px; padding: 0.5em 1em; cursor: pointer; font-weight: bold;">Copy</button>
+  <button onclick="copyInstallCmd()" id="copy-btn" style="position: absolute; top: 10px; right: 10px; background: #00b894; color: white; border: none; border-radius: 4px; padding: 0.5em 1em; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5em;">
+  <img src="vega.png" id="vega-logo" alt="Vega Logo" /> Copy
+</button>
 </div>
 <div id="copy-msg" style="color: #00b894; font-weight: bold; display: none; margin-bottom: 1em;">Copied!</div>
 

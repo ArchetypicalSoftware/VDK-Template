@@ -1,7 +1,39 @@
 site_name: VDK-Template
-site_url: https://archetypicalsoftware.github.io/VDK-Template/
+site_url: https://vdk.sh/
 docs_dir: docs
 repo_url: https://github.com/ArchetypicalSoftware/VDK-Template
 repo_name: ArchetypicalSoftware/VDK-Template
 nav:
   - Home: index.md
+
+# --- Material for MkDocs theme config ---
+theme:
+  name: material
+  logo: logo.png
+  favicon: favicon.png
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.instant
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ArchetypicalSoftware/VDK-Template
+
+extra_css:
+  - extra.css

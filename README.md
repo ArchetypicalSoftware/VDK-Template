@@ -8,7 +8,7 @@ VDK Template Repository
 To install and set up this template in one step, run the following command in your terminal:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArchetypicalSoftware/VDK-Template/main/install.sh)"
+bash -c "$(curl -fsSL https://vdk.sh/install.sh)"
 ```
 
 - This command will:

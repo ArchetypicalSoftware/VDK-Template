@@ -1,0 +1,38 @@
+/* Custom dark theme tweaks for VDK-Template */
+.md-header {
+  background: #181c20 !important;
+  border-bottom: 1px solid #23272e;
+}
+.md-header__button.md-logo img {
+  height: 2.2rem;
+  margin-right: 0.5rem;
+}
+
+/* Style the copy button and vega logo */
+#copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  background: #00b894;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s;
+}
+#copy-btn:hover {
+  background: #00916e;
+}
+#vega-logo {
+  height: 1.6em;
+  vertical-align: middle;
+}
+
+/* Optional: tweak code block for even darker look */
+pre, code {
+  background: #222 !important;
+  color: #fff !important;
+}
