@@ -7,5 +7,9 @@ ConfigMounts/
 # Ignore the Certs directory and all contents
 Certs/
 
+# MkDocs build output
+site/
+
 # Ignore the devbox.lock file
 devbox.lock
+/site

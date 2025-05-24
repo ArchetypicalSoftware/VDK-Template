@@ -1,0 +1,7 @@
+site_name: VDK-Template
+site_url: https://archetypicalsoftware.github.io/VDK-Template/
+docs_dir: docs
+repo_url: https://github.com/ArchetypicalSoftware/VDK-Template
+repo_name: ArchetypicalSoftware/VDK-Template
+nav:
+  - Home: index.md
