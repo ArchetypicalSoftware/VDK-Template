@@ -1,11 +1,28 @@
-/* Custom dark theme tweaks for VDK-Template */
-.md-header {
+/* --- Force dark theme for mkdocs --- */
+body, .md-header, .md-footer, .md-main, .md-nav, .md-content, .wy-nav-side, .wy-side-nav-search, .wy-nav-content, .wy-menu-vertical, .wy-menu-vertical a, .wy-menu-vertical header, .wy-menu-vertical li.current > a {
   background: #181c20 !important;
-  border-bottom: 1px solid #23272e;
+  color: #e8e8e8 !important;
 }
-.md-header__button.md-logo img {
-  height: 2.2rem;
-  margin-right: 0.5rem;
+
+h1, h2, h3, h4, h5, h6, .wy-menu-vertical a, .wy-nav-content a {
+  color: #fff !important;
+}
+
+/* Header logo injection for mkdocs theme */
+.wy-side-nav-search .brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5em;
+}
+.wy-side-nav-search .brand:before {
+  content: '';
+  display: inline-block;
+  background: url('logo.png') no-repeat center center;
+  background-size: contain;
+  width: 36px;
+  height: 36px;
+  margin-right: 0.5em;
 }
 
 /* Style the copy button and vega logo */
@@ -31,8 +48,12 @@
   vertical-align: middle;
 }
 
-/* Optional: tweak code block for even darker look */
 pre, code {
   background: #222 !important;
   color: #fff !important;
+}
+
+/* Favicon for mkdocs theme */
+head link[rel="shortcut icon"] {
+  content: url('favicon.png');
 }
