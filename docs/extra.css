@@ -8,22 +8,20 @@ h1, h2, h3, h4, h5, h6, .wy-menu-vertical a, .wy-nav-content a {
   color: #fff !important;
 }
 
-/* Header logo injection for mkdocs theme */
-.wy-side-nav-search .brand {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5em;
-}
-.wy-side-nav-search .brand:before {
-  content: '';
+/* Header company logo for mkdocs theme */
+.wy-header .arche-logo {
   display: inline-block;
-  background: url('logo.png') no-repeat center center;
-  background-size: contain;
-  width: 36px;
+  vertical-align: middle;
   height: 36px;
-  margin-right: 0.5em;
+  margin-right: 0.75em;
 }
+
+.wy-header .site-name {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Inject logo into header via JS below */
 
 /* Style the copy button and vega logo */
 #copy-btn {
