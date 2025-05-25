@@ -11,6 +11,9 @@
   },
   "shell": {
     "init_hook": [
+      "echo 'Welcome to Vega Dev Shell!'",
+      "echo 'Docs: https://vdk.sh | GitHub: https://github.com/ArchetypicalSoftware/VDK-Template'",
+      "alias vega='./.bin/vega'",
       "./init.sh"
     ],
     "scripts": {

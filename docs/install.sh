@@ -61,12 +61,20 @@ else
     # Bash and Zsh
     for PROFILE in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$PROFILE" ]; then
-            if ! grep -q "alias start-vega" "$PROFILE"; then
-                echo 'ssv() { cd "$HOME/.vega" && devbox shell; cd -; }' >> "$PROFILE"
-                echo "alias start-vega='source ssv'" >> "$PROFILE"
-                echo "[INFO] Alias 'start-vega' added to $PROFILE."
+            if ! grep -q "start-vega()" "$PROFILE"; then
+                cat <<'EOF' >> "$PROFILE"
+if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
+    start-vega() {
+        local orig="$PWD"
+        cd "$HOME/.vega" && devbox shell
+        cd "$orig"
+    }
+fi
+EOF
+                echo "[INFO] Function 'start-vega' added to $PROFILE."
+                . "$PROFILE"
             else
-                echo "[INFO] Alias 'start-vega' already exists in $PROFILE."
+                echo "[INFO] Function 'start-vega' already exists in $PROFILE."
             fi
         fi
     done
