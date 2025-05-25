@@ -13,6 +13,16 @@ Copy and paste this command into your terminal, or click the button to copy:
   <pre style="background: #222; color: #fff; padding: 1em; border-radius: 6px; overflow-x: auto; margin: 0 auto 0.5em auto; max-width: 700px;">
     <code id="install-cmd">bash -c "$(curl -fsSL https://vdk.sh/install.sh)"</code>
   </pre>
+</div>
+
+**After installation, run:**
+
+```bash
+start-vega
+```
+
+This will launch your Vega development environment with all tools and CLI available.
+
   <button onclick="copyInstallCmd()" id="copy-btn" style="position: absolute; top: 10px; right: 10px; background: #00b894; color: white; border: none; border-radius: 4px; padding: 0.5em 1em; cursor: pointer; font-weight: bold;">Copy</button>
 </div>
 <div id="copy-msg" style="color: #00b894; font-weight: bold; display: none; margin-bottom: 1em;">Copied!</div>
@@ -46,17 +56,6 @@ window.addEventListener('DOMContentLoaded', function() {
   1. Check for [devbox](https://www.jetify.com/devbox); install if missing.
   2. Download the latest `devbox.json` and `init.sh` from this repo.
   3. Print helpful status and error messages.
-
----
-
-## Manual Setup (Advanced)
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ArchetypicalSoftware/VDK-Template.git
-   cd VDK-Template
-   ```
-2. Run `devbox shell` to initialize the environment.
 
 ---
 
