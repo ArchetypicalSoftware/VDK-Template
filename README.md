@@ -1,6 +1,23 @@
 # VDK-Template
 VDK Template Repository
 
+---
+
+## 🚀 Quick Installation
+
+To install and set up this template in one step, run the following command in your terminal:
+
+```bash
+bash -c "$(curl -fsSL https://vdk.sh/install.sh)"
+```
+
+- This command will:
+  1. Check if you have [devbox](https://www.jetify.com/devbox) installed, and install it if missing.
+  2. Download the latest `devbox.json` and `init.sh` from this repository.
+  3. Print helpful status/error messages and exit if anything fails.
+
+---
+
 ## Requirements
 The VDK is designed to run inside a devbox shell.  You will need a Linux-based system with Docker installed to run the VDK. You can download and install Docker from [Docker's official website](https://www.docker.com/products/docker-desktop). (On Windows, you can use Docker Desktop for Windows and WSL)
 DevBox will automatically configure your shell environment for you and download the latest version of the VDK CLI.

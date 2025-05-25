@@ -6,6 +6,9 @@
     "docker@latest",
     "jq@latest"
   ],
+  "env": {
+    "PATH": "./.bin:$PATH"
+  },
   "shell": {
     "init_hook": [
       "./init.sh"

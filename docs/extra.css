@@ -1,0 +1,57 @@
+/* --- Force dark theme for mkdocs --- */
+body, .md-header, .md-footer, .md-main, .md-nav, .md-content, .wy-nav-side, .wy-side-nav-search, .wy-nav-content, .wy-menu-vertical, .wy-menu-vertical a, .wy-menu-vertical header, .wy-menu-vertical li.current > a {
+  background: #181c20 !important;
+  color: #e8e8e8 !important;
+}
+
+h1, h2, h3, h4, h5, h6, .wy-menu-vertical a, .wy-nav-content a {
+  color: #fff !important;
+}
+
+/* Header company logo for mkdocs theme */
+.wy-header .arche-logo {
+  display: inline-block;
+  vertical-align: middle;
+  height: 36px;
+  margin-right: 0.75em;
+}
+
+.wy-header .site-name {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Inject logo into header via JS below */
+
+/* Style the copy button and vega logo */
+#copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  background: #00b894;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s;
+}
+#copy-btn:hover {
+  background: #00916e;
+}
+#vega-logo {
+  height: 1.6em;
+  vertical-align: middle;
+}
+
+pre, code {
+  background: #222 !important;
+  color: #fff !important;
+}
+
+/* Favicon for mkdocs theme */
+head link[rel="shortcut icon"] {
+  content: url('favicon.png');
+}

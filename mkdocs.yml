@@ -1,0 +1,19 @@
+site_name: VDK Installer
+site_url: https://vdk.sh/
+docs_dir: docs
+repo_url: https://github.com/ArchetypicalSoftware/VDK-Template
+repo_name: ArchetypicalSoftware/VDK-Template
+nav:
+  - Home: index.md
+
+# --- Material for MkDocs theme config ---
+theme:
+  name: mkdocs
+
+# Logo and favicon for custom CSS
+extra:
+  logo: logo.png
+  favicon: favicon.png
+
+extra_css:
+  - extra.css
