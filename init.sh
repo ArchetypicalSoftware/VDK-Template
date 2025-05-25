@@ -112,10 +112,8 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     cd ..
     echo "$PATH" | grep -q $BIN_PATH
     if [ $? -ne 0 ]; then
-        echo "[INFO] Adding $BIN_PATH to PATH for this session and future shells."
+        echo "[INFO] Adding $BIN_PATH to PATH for this session."
         export PATH="$PATH:$BIN_PATH"
-        echo "export PATH=\"\$PATH:$BIN_PATH\"" >> ~/.bashrc
-        echo "[INFO] Please restart your shell or run: export PATH=\"\$PATH:$BIN_PATH\""
     fi
 
     # Check Vega CLI version
