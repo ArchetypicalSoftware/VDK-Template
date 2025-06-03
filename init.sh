@@ -37,7 +37,7 @@ fi
 echo "Welcome to Vega VDK"
 # Variables
 REPO="ArchetypicalSoftware/VDK" # Replace with your GitHub repository (e.g., username/repo)
-DOWNLOAD_DIR="./.bin" # Specify the download directory
+DOWNLOAD_DIR="$HOME/.vega/.bin" # Specify the download directory
 
     # Detect OS and architecture and map to .NET Runtime Identifiers (RIDs)
     UNAME_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -69,7 +69,7 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     echo "Fetching the latest release information..."
     LATEST_RELEASE=$(curl -s "https://api.github.com/repos/$REPO/releases/latest")
     VERSION=$(echo "$LATEST_RELEASE" | jq -r ".tag_name")
-    CURRENT=$(cat ./.bin/vdk.version)
+    CURRENT=$(cat $HOME/.vega/.bin/vdk.version)
     if [ "$VERSION" != "$CURRENT" ]; then
         # Extract the browser_download_url for the detected asset
         ASSET_URL=$(echo "$LATEST_RELEASE" | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .browser_download_url")
@@ -89,14 +89,14 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         echo "Download complete! File saved to \"$DOWNLOAD_DIR/$ASSET_NAME\""  
         echo "Extracting Vega CLI..."
         tar --overwrite -xvf "$DOWNLOAD_DIR/$ASSET_NAME" -C "$DOWNLOAD_DIR"
-        # Find the vega binary in the extracted files and move it to ./.bin/vega
+        # Find the vega binary in the extracted files and move it to $HOME/.vega/.bin/vega
         FOUND_VEGA=$(find "$DOWNLOAD_DIR" -type f -name vega | head -n 1)
         if [ -n "$FOUND_VEGA" ]; then
-            if [ "$FOUND_VEGA" != "./.bin/vega" ]; then
-                mv -f "$FOUND_VEGA" ./.bin/vega
-                echo "[INFO] Vega binary moved to ./.bin/vega"
+            if [ "$FOUND_VEGA" != "$HOME/.vega/.bin/vega" ]; then
+                mv -f "$FOUND_VEGA" $HOME/.vega/.bin/vega
+                echo "[INFO] Vega binary moved to $HOME/.vega/.bin/vega"
             else
-                echo "[INFO] Vega binary already in ./.bin/vega"
+                echo "[INFO] Vega binary already in $HOME/.vega/.bin/vega"
             fi
         else
             echo "[WARNING] Vega binary not found after extraction."
@@ -107,7 +107,7 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     else
         echo "Version: $CURRENT"
     fi
-    cd ./.bin
+    cd $HOME/.vega/.bin
     BIN_PATH=$(pwd)
     cd ..
     echo "$PATH" | grep -q $BIN_PATH
