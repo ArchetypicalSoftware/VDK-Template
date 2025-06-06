@@ -57,6 +57,21 @@ window.addEventListener('DOMContentLoaded', function() {
   2. Download the latest `devbox.json` and `init.sh` from this repo.
   3. Print helpful status and error messages.
 
+## 🔄 Uninstallation
+
+To uninstall VDK, run the following command:
+
+```bash
+bash -c "$(curl -fsSL https://vdk.sh/uninstall.sh)"
+```
+
+This will:
+1. Remove the VDK installation and related files
+2. Clean up any configuration files
+3. Restore your system to its pre-installation state
+
+After uninstallation, you can verify that VDK has been removed by checking that the `start-vega` command is no longer available.
+
 ---
 
 ## About
