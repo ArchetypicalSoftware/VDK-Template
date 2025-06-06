@@ -21,6 +21,17 @@ Copy and paste this command into your terminal, or click the button to copy:
 start-vega
 ```
 
+**Note:** If you see "command not found" error, please either:
+1. Restart your terminal/shell, or
+2. Source your shell profile by running one of these commands (depending on your shell):
+   ```bash
+   source ~/.bashrc       # for bash users (interactive non-login shell)
+   source ~/.bash_profile # for bash users (login shell)
+   source ~/.zshrc        # for zsh users
+   ```
+
+   If you're not sure which shell you're using, run `echo $SHELL` to find out.
+
 This will launch your Vega development environment with all tools and CLI available.
 
   <button onclick="copyInstallCmd()" id="copy-btn" style="position: absolute; top: 10px; right: 10px; background: #00b894; color: white; border: none; border-radius: 4px; padding: 0.5em 1em; cursor: pointer; font-weight: bold;">Copy</button>
