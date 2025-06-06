@@ -42,22 +42,32 @@ else
     for PROFILE_FILE in "$USER_PROFILE/.bash_profile" "$USER_PROFILE/.bashrc" "$USER_PROFILE/.zshrc"; do
         if [ -f "$PROFILE_FILE" ]; then
             if grep -q "start-vega()" "$PROFILE_FILE"; then
-                # Use a more reliable method to remove the function block
-                # Create a temporary file to store the cleaned content
-                TEMP_FILE="${PROFILE_FILE}.tmp"
+                # Use sed to remove the specific block added by install script
+                # Create a backup of the original file
+                cp "$PROFILE_FILE" "${PROFILE_FILE}.bak"
                 
-                # Read the file line by line and skip the start-vega function block
-                awk '/start-vega\(\) {/ { in_start_vega = 1; next }
-                    in_start_vega && /^[[:space:]]*}/ { in_start_vega = 0; next }
-                    !in_start_vega { print }' "$PROFILE_FILE" > "$TEMP_FILE"
+                # Remove the entire block containing start-vega function and its contents
+                sed -i.bak '/if \[ -n "\$BASH_VERSION" \] || \[ -n "\$ZSH_VERSION" \]; then/,/fi/ { 
+                    /if \[ -n "\$BASH_VERSION" \] || \[ -n "\$ZSH_VERSION" \]; then/ { 
+                        d 
+                    }
+                    /start-vega() {/,/}/ { 
+                        d 
+                    }
+                    /fi/ { 
+                        d 
+                    }
+                }' "$PROFILE_FILE"
                 
-                # Replace the original file with the cleaned version
-                if mv "$TEMP_FILE" "$PROFILE_FILE"; then
-                    info "'start-vega' function removed from $PROFILE_FILE."
+                # Check if the file still exists and has content
+                if [ -s "$PROFILE_FILE" ]; then
+                    info "Removed 'start-vega' function and its surrounding conditional block from $PROFILE_FILE."
                     info "A backup was created: ${PROFILE_FILE}.bak"
                     info "Please source your $PROFILE_FILE or restart your shell for changes to take effect."
                 else
                     warn "Failed to update $PROFILE_FILE. Please check permissions and try again."
+                    # Restore from backup if file is empty
+                    cp "${PROFILE_FILE}.bak" "$PROFILE_FILE"
                 fi
             else
                 info "'start-vega' function not found in $PROFILE_FILE."
