@@ -59,7 +59,8 @@ if [[ "$OS" == "Windows_NT" ]]; then
     fi
 else
     # Bash and Zsh
-    for PROFILE in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    profile_modified_for_bash_zsh=false
+    for PROFILE in "$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$PROFILE" ]; then
             if ! grep -q "start-vega()" "$PROFILE"; then
                 cat <<'EOF' >> "$PROFILE"
@@ -73,12 +74,16 @@ fi
 EOF
                 echo "[INFO] Function 'start-vega' added to $PROFILE."
                 . "$PROFILE"
+                profile_modified_for_bash_zsh=true
             else
                 echo "[INFO] Function 'start-vega' already exists in $PROFILE."
             fi
         fi
     done
+
+    if [ "$profile_modified_for_bash_zsh" = true ]; then
+        echo "[INFO] To use 'start-vega' in your current terminal, please source your shell profile (e.g., 'source ~/.bashrc') or open a new terminal."
+    fi
 fi
 
 echo "[SUCCESS] Setup complete! Files are in $VEGA_DIR."
-
