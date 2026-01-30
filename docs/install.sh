@@ -62,13 +62,11 @@ fi
 
 # Create empty placeholder files if they don't exist (will be replaced by init.sh with real certs)
 if [ ! -f "$CERTS_DIR/fullchain.pem" ]; then
-    touch "$CERTS_DIR/fullchain.pem"
-    chmod 644 "$CERTS_DIR/fullchain.pem"
+    install -m 600 /dev/null "$CERTS_DIR/fullchain.pem"
     echo "[INFO] Created placeholder $CERTS_DIR/fullchain.pem"
 fi
 if [ ! -f "$CERTS_DIR/privkey.pem" ]; then
-    touch "$CERTS_DIR/privkey.pem"
-    chmod 600 "$CERTS_DIR/privkey.pem"
+    install -m 600 /dev/null "$CERTS_DIR/privkey.pem"
     echo "[INFO] Created placeholder $CERTS_DIR/privkey.pem"
 fi
 echo "[INFO] Certs directory prepared at $CERTS_DIR"
