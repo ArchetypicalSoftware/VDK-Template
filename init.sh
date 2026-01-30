@@ -107,6 +107,21 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     else
         echo "Version: $CURRENT"
     fi
+    # Copy Certs folder to project root (required for TLS)
+FOUND_CERTS=$(find "$DOWNLOAD_DIR" -type d -name Certs | head -n 1)
+if [ -n "$FOUND_CERTS" ] && [ -d "$FOUND_CERTS" ]; then
+    # Remove any incorrectly created directories from previous Docker runs
+    if [ -d "./Certs/fullchain.pem" ]; then
+        rm -rf "./Certs/fullchain.pem" 2>/dev/null || sudo rm -rf "./Certs/fullchain.pem"
+    fi
+    if [ -d "./Certs/privkey.pem" ]; then
+        rm -rf "./Certs/privkey.pem" 2>/dev/null || sudo rm -rf "./Certs/privkey.pem"
+    fi
+    mkdir -p ./Certs
+    cp -f "$FOUND_CERTS"/* ./Certs/ 2>/dev/null
+    echo "[INFO] Certificates copied to ./Certs/"
+fi
+
     cd ./.bin
     BIN_PATH=$(pwd)
     cd ..
