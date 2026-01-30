@@ -149,10 +149,11 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         echo "[INFO] Local certificates missing or invalid; copying from $HOME_CERTS_DIR to $LOCAL_CERTS_DIR"
         mkdir -p "$LOCAL_CERTS_DIR"
         chmod 700 "$LOCAL_CERTS_DIR"
-        cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/ 2>/dev/null || \
-            sudo cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/
-        chmod 600 "$LOCAL_CERTS_DIR/fullchain.pem" "$LOCAL_CERTS_DIR/privkey.pem" 2>/dev/null || \
+        if cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/ 2>/dev/null; then
+            chmod 600 "$LOCAL_CERTS_DIR/fullchain.pem" "$LOCAL_CERTS_DIR/privkey.pem"
+        elif sudo cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/; then
             sudo chmod 600 "$LOCAL_CERTS_DIR/fullchain.pem" "$LOCAL_CERTS_DIR/privkey.pem"
+        fi
         if check_certs_valid "$LOCAL_CERTS_DIR"; then
             echo "[INFO] Successfully populated $LOCAL_CERTS_DIR from $HOME_CERTS_DIR"
         else
@@ -204,8 +205,8 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         # Copy certs to project root
         mkdir -p ./Certs
         chmod 700 ./Certs
-        if cp -f "$FOUND_CERTS/fullchain.pem" ./Certs/ && cp -f "$FOUND_CERTS/privkey.pem" ./Certs/; then
-            chmod 600 ./Certs/fullchain.pem ./Certs/privkey.pem
+        if cp -f "$FOUND_CERTS/fullchain.pem" ./Certs/ && cp -f "$FOUND_CERTS/privkey.pem" ./Certs/ && \
+           chmod 600 ./Certs/fullchain.pem ./Certs/privkey.pem; then
             echo "[INFO] Certificates copied to ./Certs/"
         else
             echo "[WARNING] Failed to copy certificates to ./Certs/"
@@ -213,8 +214,8 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         # Copy to ~/.vega/Certs for vega CLI
         mkdir -p "$HOME/.vega/Certs"
         chmod 700 "$HOME/.vega/Certs"
-        if cp -f "$FOUND_CERTS/fullchain.pem" "$HOME/.vega/Certs/" && cp -f "$FOUND_CERTS/privkey.pem" "$HOME/.vega/Certs/"; then
-            chmod 600 "$HOME/.vega/Certs/fullchain.pem" "$HOME/.vega/Certs/privkey.pem"
+        if cp -f "$FOUND_CERTS/fullchain.pem" "$HOME/.vega/Certs/" && cp -f "$FOUND_CERTS/privkey.pem" "$HOME/.vega/Certs/" && \
+           chmod 600 "$HOME/.vega/Certs/fullchain.pem" "$HOME/.vega/Certs/privkey.pem"; then
             echo "[INFO] Certificates copied to $HOME/.vega/Certs/"
         else
             echo "[WARNING] Failed to copy certificates to $HOME/.vega/Certs/"
