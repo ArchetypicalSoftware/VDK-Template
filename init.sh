@@ -107,20 +107,100 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
     else
         echo "Version: $CURRENT"
     fi
-    # Copy Certs folder to project root (required for TLS)
-FOUND_CERTS=$(find "$DOWNLOAD_DIR" -type d -name Certs | head -n 1)
-if [ -n "$FOUND_CERTS" ] && [ -d "$FOUND_CERTS" ]; then
-    # Remove any incorrectly created directories from previous Docker runs
-    if [ -d "./Certs/fullchain.pem" ]; then
-        rm -rf "./Certs/fullchain.pem" 2>/dev/null || sudo rm -rf "./Certs/fullchain.pem"
+    # Certificate handling (required for TLS)
+    # Always clean up incorrectly created directories from previous Docker runs
+    # This can happen when Docker mounts a non-existent file path as a directory
+    for CERT_DIR in "./Certs" "$HOME/.vega/Certs"; do
+        if [ -d "$CERT_DIR/fullchain.pem" ]; then
+            echo "[INFO] Removing incorrectly created directory: $CERT_DIR/fullchain.pem"
+            rm -rf "$CERT_DIR/fullchain.pem" 2>/dev/null || sudo rm -rf "$CERT_DIR/fullchain.pem"
+        fi
+        if [ -d "$CERT_DIR/privkey.pem" ]; then
+            echo "[INFO] Removing incorrectly created directory: $CERT_DIR/privkey.pem"
+            rm -rf "$CERT_DIR/privkey.pem" 2>/dev/null || sudo rm -rf "$CERT_DIR/privkey.pem"
+        fi
+    done
+
+    # Function to check if certs are valid (exist and non-empty)
+    check_certs_valid() {
+        local dir="$1"
+        [ -f "$dir/fullchain.pem" ] && [ -s "$dir/fullchain.pem" ] && \
+        [ -f "$dir/privkey.pem" ] && [ -s "$dir/privkey.pem" ]
+    }
+
+    # Check if certificates are missing or invalid in target location
+    CERTS_VALID=false
+    if check_certs_valid "$HOME/.vega/Certs"; then
+        CERTS_VALID=true
+        echo "[INFO] Valid certificates found in $HOME/.vega/Certs/"
     fi
-    if [ -d "./Certs/privkey.pem" ]; then
-        rm -rf "./Certs/privkey.pem" 2>/dev/null || sudo rm -rf "./Certs/privkey.pem"
+
+    # Try to find certs - search for both directory and actual files
+    FOUND_CERTS=""
+    if [ "$CERTS_VALID" = false ]; then
+        # First try to find Certs directory in download dir
+        FOUND_CERTS=$(find "$DOWNLOAD_DIR" -type d -name Certs 2>/dev/null | head -n 1)
+
+        # If not found, search for the actual pem files
+        if [ -z "$FOUND_CERTS" ] || [ ! -f "$FOUND_CERTS/fullchain.pem" ]; then
+            FOUND_FULLCHAIN=$(find "$DOWNLOAD_DIR" -type f -name "fullchain.pem" 2>/dev/null | head -n 1)
+            if [ -n "$FOUND_FULLCHAIN" ]; then
+                FOUND_CERTS=$(dirname "$FOUND_FULLCHAIN")
+                echo "[INFO] Found certificates at: $FOUND_CERTS"
+            fi
+        fi
     fi
-    mkdir -p ./Certs
-    cp -f "$FOUND_CERTS"/* ./Certs/ 2>/dev/null
-    echo "[INFO] Certificates copied to ./Certs/"
-fi
+
+    # If certs are invalid and not found locally, force re-download to get them
+    if [ "$CERTS_VALID" = false ] && { [ -z "$FOUND_CERTS" ] || [ ! -f "$FOUND_CERTS/fullchain.pem" ]; }; then
+        echo "[INFO] Certificates missing or invalid. Re-downloading release to get certificates..."
+        ASSET_URL=$(echo "$LATEST_RELEASE" | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .browser_download_url")
+        if [ -n "$ASSET_URL" ] && [ "$ASSET_URL" != "null" ]; then
+            curl -L "$ASSET_URL" -o "$DOWNLOAD_DIR/$ASSET_NAME"
+            tar --overwrite -xvf "$DOWNLOAD_DIR/$ASSET_NAME" -C "$DOWNLOAD_DIR"
+            rm -f "$DOWNLOAD_DIR/$ASSET_NAME"
+            # Search again after extraction
+            FOUND_FULLCHAIN=$(find "$DOWNLOAD_DIR" -type f -name "fullchain.pem" 2>/dev/null | head -n 1)
+            if [ -n "$FOUND_FULLCHAIN" ]; then
+                FOUND_CERTS=$(dirname "$FOUND_FULLCHAIN")
+                echo "[INFO] Found certificates after extraction at: $FOUND_CERTS"
+            else
+                echo "[WARNING] No fullchain.pem found in downloaded release"
+                # List what was extracted for debugging
+                echo "[DEBUG] Contents of $DOWNLOAD_DIR:"
+                find "$DOWNLOAD_DIR" -type f -name "*.pem" 2>/dev/null || echo "  (no .pem files found)"
+            fi
+        else
+            echo "[ERROR] Could not get download URL for release"
+        fi
+    fi
+
+    # Copy certs if we have a valid source
+    if [ -n "$FOUND_CERTS" ] && [ -f "$FOUND_CERTS/fullchain.pem" ] && [ -f "$FOUND_CERTS/privkey.pem" ]; then
+        # Copy certs to project root
+        mkdir -p ./Certs
+        if cp -f "$FOUND_CERTS/fullchain.pem" ./Certs/ && cp -f "$FOUND_CERTS/privkey.pem" ./Certs/; then
+            echo "[INFO] Certificates copied to ./Certs/"
+        else
+            echo "[WARNING] Failed to copy certificates to ./Certs/"
+        fi
+        # Copy to ~/.vega/Certs for vega CLI
+        mkdir -p "$HOME/.vega/Certs"
+        if cp -f "$FOUND_CERTS/fullchain.pem" "$HOME/.vega/Certs/" && cp -f "$FOUND_CERTS/privkey.pem" "$HOME/.vega/Certs/"; then
+            echo "[INFO] Certificates copied to $HOME/.vega/Certs/"
+        else
+            echo "[WARNING] Failed to copy certificates to $HOME/.vega/Certs/"
+        fi
+        # Verify the copy worked
+        if check_certs_valid "$HOME/.vega/Certs"; then
+            echo "[SUCCESS] Certificates are now valid in $HOME/.vega/Certs/"
+        else
+            echo "[ERROR] Certificate copy verification failed"
+        fi
+    elif [ "$CERTS_VALID" = false ]; then
+        echo "[ERROR] Could not obtain valid certificates. TLS may not work correctly."
+        echo "[INFO] Expected certificate files: fullchain.pem and privkey.pem"
+    fi
 
     cd ./.bin
     BIN_PATH=$(pwd)

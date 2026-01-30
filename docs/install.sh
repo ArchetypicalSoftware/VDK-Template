@@ -44,6 +44,32 @@ else
     err "Failed to download init.sh."; exit 1
 fi
 
+# Pre-create Certs directory and placeholder files to prevent Docker from creating them as directories
+# This is a common issue on macOS and ARM machines when Docker mounts non-existent file paths
+CERTS_DIR="$VEGA_DIR/Certs"
+mkdir -p "$CERTS_DIR"
+
+# Clean up any incorrectly created directories from previous Docker runs
+if [ -d "$CERTS_DIR/fullchain.pem" ]; then
+    echo "[INFO] Removing incorrectly created directory: $CERTS_DIR/fullchain.pem"
+    rm -rf "$CERTS_DIR/fullchain.pem" 2>/dev/null || sudo rm -rf "$CERTS_DIR/fullchain.pem"
+fi
+if [ -d "$CERTS_DIR/privkey.pem" ]; then
+    echo "[INFO] Removing incorrectly created directory: $CERTS_DIR/privkey.pem"
+    rm -rf "$CERTS_DIR/privkey.pem" 2>/dev/null || sudo rm -rf "$CERTS_DIR/privkey.pem"
+fi
+
+# Create empty placeholder files if they don't exist (will be replaced by init.sh with real certs)
+if [ ! -f "$CERTS_DIR/fullchain.pem" ]; then
+    touch "$CERTS_DIR/fullchain.pem"
+    echo "[INFO] Created placeholder $CERTS_DIR/fullchain.pem"
+fi
+if [ ! -f "$CERTS_DIR/privkey.pem" ]; then
+    touch "$CERTS_DIR/privkey.pem"
+    echo "[INFO] Created placeholder $CERTS_DIR/privkey.pem"
+fi
+echo "[INFO] Certs directory prepared at $CERTS_DIR"
+
 # Set up persistent global alias 'start-vega'
 echo "[INFO] Setting up global alias 'start-vega'..."
 
