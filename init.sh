@@ -128,13 +128,34 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         [ -f "$dir/privkey.pem" ] && [ -s "$dir/privkey.pem" ]
     }
 
-    # Check if certificates are missing or invalid in target location
+    # Check if certificates are missing or invalid in both home and local locations
     CERTS_VALID=false
-    if check_certs_valid "$HOME/.vega/Certs"; then
+    HOME_CERTS_DIR="$HOME/.vega/Certs"
+    LOCAL_CERTS_DIR="./Certs"
+
+    # Prefer using any already-valid certs
+    if check_certs_valid "$HOME_CERTS_DIR"; then
         CERTS_VALID=true
-        echo "[INFO] Valid certificates found in $HOME/.vega/Certs/"
+        echo "[INFO] Valid certificates found in $HOME_CERTS_DIR/"
     fi
 
+    if check_certs_valid "$LOCAL_CERTS_DIR"; then
+        CERTS_VALID=true
+        echo "[INFO] Valid certificates found in $LOCAL_CERTS_DIR/"
+    fi
+
+    # If home certs are valid but local certs are missing/invalid, copy them locally
+    if check_certs_valid "$HOME_CERTS_DIR" && ! check_certs_valid "$LOCAL_CERTS_DIR"; then
+        echo "[INFO] Local certificates missing or invalid; copying from $HOME_CERTS_DIR to $LOCAL_CERTS_DIR"
+        mkdir -p "$LOCAL_CERTS_DIR"
+        cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/ 2>/dev/null || \
+            sudo cp "$HOME_CERTS_DIR/fullchain.pem" "$HOME_CERTS_DIR/privkey.pem" "$LOCAL_CERTS_DIR"/
+        if check_certs_valid "$LOCAL_CERTS_DIR"; then
+            echo "[INFO] Successfully populated $LOCAL_CERTS_DIR from $HOME_CERTS_DIR"
+        else
+            echo "[WARN] Failed to fully populate $LOCAL_CERTS_DIR from $HOME_CERTS_DIR"
+        fi
+    fi
     # Try to find certs - search for both directory and actual files
     FOUND_CERTS=""
     if [ "$CERTS_VALID" = false ]; then
