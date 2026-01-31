@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl -e bash -c:*)",
+      "Bash(dotnet --version:*)",
+      "Bash(dotnet publish:*)"
+    ]
+  }
+}

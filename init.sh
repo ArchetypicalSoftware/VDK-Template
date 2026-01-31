@@ -231,6 +231,108 @@ DOWNLOAD_DIR="./.bin" # Specify the download directory
         echo "[INFO] Expected certificate files: fullchain.pem and privkey.pem"
     fi
 
+    # ConfigMounts handling - copy config files from release to ~/.vega/
+    mkdir -p "$HOME/.vega/ConfigMounts"
+
+    # Clean up any incorrectly created directories in ConfigMounts
+    if [ -d "$HOME/.vega/ConfigMounts/zot-config.json" ]; then
+        echo "[INFO] Removing incorrectly created directory: $HOME/.vega/ConfigMounts/zot-config.json"
+        rm -rf "$HOME/.vega/ConfigMounts/zot-config.json" 2>/dev/null || sudo rm -rf "$HOME/.vega/ConfigMounts/zot-config.json"
+    fi
+    if [ -d "$HOME/.vega/ConfigMounts/hosts.toml" ]; then
+        echo "[INFO] Removing incorrectly created directory: $HOME/.vega/ConfigMounts/hosts.toml"
+        rm -rf "$HOME/.vega/ConfigMounts/hosts.toml" 2>/dev/null || sudo rm -rf "$HOME/.vega/ConfigMounts/hosts.toml"
+    fi
+
+    FOUND_CONFIGMOUNTS=$(find "$DOWNLOAD_DIR" -type d -name ConfigMounts 2>/dev/null | head -n 1)
+    if [ -n "$FOUND_CONFIGMOUNTS" ] && [ -d "$FOUND_CONFIGMOUNTS" ]; then
+        cp -rf "$FOUND_CONFIGMOUNTS"/* "$HOME/.vega/ConfigMounts/" 2>/dev/null
+        echo "[INFO] ConfigMounts copied to $HOME/.vega/ConfigMounts/"
+    fi
+
+    # Ensure zot-config.json exists - create default if not found
+    ZOT_CONFIG="$HOME/.vega/ConfigMounts/zot-config.json"
+    if [ ! -f "$ZOT_CONFIG" ] || [ ! -s "$ZOT_CONFIG" ]; then
+        # Try to find in download directory
+        FOUND_ZOT=$(find "$DOWNLOAD_DIR" -type f -name "zot-config.json" 2>/dev/null | head -n 1)
+        if [ -n "$FOUND_ZOT" ] && [ -f "$FOUND_ZOT" ]; then
+            cp -f "$FOUND_ZOT" "$ZOT_CONFIG"
+            echo "[INFO] zot-config.json copied from release"
+        else
+            # Create default config
+            echo "[INFO] Creating default zot-config.json"
+            cat > "$ZOT_CONFIG" << 'ZOTEOF'
+{
+  "distSpecVersion": "1.1.0",
+  "storage": {
+    "rootDirectory": "/var/lib/registry",
+    "gc": true,
+    "gcDelay": "1h",
+    "gcInterval": "24h"
+  },
+  "http": {
+    "address": "0.0.0.0",
+    "port": "5000"
+  },
+  "log": {
+    "level": "info"
+  },
+  "extensions": {
+    "ui": {
+      "enable": true
+    },
+    "search": {
+      "enable": true,
+      "cve": {
+        "updateInterval": "24h"
+      }
+    }
+  }
+}
+ZOTEOF
+        fi
+    fi
+
+    # Verify zot-config.json is valid
+    if [ -f "$ZOT_CONFIG" ] && [ -s "$ZOT_CONFIG" ]; then
+        echo "[SUCCESS] zot-config.json is ready at $ZOT_CONFIG"
+    else
+        echo "[WARNING] zot-config.json could not be created"
+    fi
+
+    # Docker mount fix: Clean up any files that were incorrectly created as directories
+    # This is a common issue when Docker tries to mount a file that doesn't exist
+    # Docker creates a directory instead of failing, breaking subsequent mount attempts
+    cleanup_docker_mount_dirs() {
+        local base_dir="$1"
+        if [ ! -d "$base_dir" ]; then
+            return
+        fi
+        # Common config files that vega might try to mount
+        local config_files=(
+            "config.json"
+            "zot-config.json"
+            "hosts.toml"
+            "vega.conf"
+        )
+        for config_file in "${config_files[@]}"; do
+            # Search for any directory with this name (should be a file)
+            while IFS= read -r dir_path; do
+                if [ -d "$dir_path" ]; then
+                    echo "[INFO] Removing incorrectly created directory: $dir_path"
+                    rm -rf "$dir_path" 2>/dev/null || sudo rm -rf "$dir_path"
+                fi
+            done < <(find "$base_dir" -type d -name "$config_file" 2>/dev/null)
+        done
+    }
+
+    # Clean up ~/.vega directory
+    cleanup_docker_mount_dirs "$HOME/.vega"
+
+    # Ensure vega config directory structure exists
+    mkdir -p "$HOME/.vega/ConfigMounts"
+    mkdir -p "$HOME/.vega/Certs"
+
     cd ./.bin
     BIN_PATH=$(pwd)
     cd ..
